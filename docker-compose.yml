@@ -1,0 +1,63 @@
+version: "3"
+services:
+  # Build only
+  ubuntu:
+    build:
+      context: https://github.com/lancachenet/ubuntu.git
+    image: lancachenet/ubuntu:latest
+    entrypoint: sh -c exit
+  ubuntu-nginx:
+    build:
+      context: https://github.com/lancachenet/ubuntu-nginx.git
+    image: lancachenet/ubuntu-nginx:latest
+    depends_on: 
+      - ubuntu
+    entrypoint: sh -c exit
+  generic:
+    build:
+      context: https://github.com/lancachenet/generic.git
+    image: lancachenet/generic-middle:latest
+    depends_on:
+      - ubuntu-nginx
+    entrypoint: sh -c exit
+  generic-patched:
+    build:
+      context: .
+      dockerfile: generic-patched.dockerfile
+    image: lancachenet/generic:latest
+    depends_on:
+      - generic
+    entrypoint: sh -c exit
+
+
+  # Actual services
+  monolith:
+    build:
+      context: https://github.com/lancachenet/monolithic.git
+    depends_on: 
+      - generic
+    image: lancachenet/monolithic:latest
+    env_file: .env
+    ports:
+      - 80:80/tcp
+    volumes: 
+      - ${CACHE_ROOT}/cache:/data/cache
+      - ${CACHE_ROOT}/logs:/data/logs
+
+  dns:
+    build:
+      context: https://github.com/lancachenet/lancache-dns.git
+    depends_on:
+      - ubuntu
+    image: lancachenet/lancache-dns:latest
+    env_file: .env
+    ports:
+      - ${DNS_BIND_IP}:53:53/udp
+  
+  sniproxy:
+    build:
+      context: https://github.com/lancachenet/sniproxy.git
+    image: lancachenet/sniproxy:latest
+    env_file: .env
+    ports:
+      - 443:443/tcp
