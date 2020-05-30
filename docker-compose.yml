@@ -43,6 +43,7 @@ services:
     volumes: 
       - ${CACHE_ROOT}/cache:/data/cache
       - ${CACHE_ROOT}/logs:/data/logs
+    restart: always
 
   dns:
     build:
@@ -53,6 +54,7 @@ services:
     env_file: .env
     ports:
       - ${DNS_BIND_IP}:53:53/udp
+    restart: always
   
   sniproxy:
     build:
@@ -61,3 +63,4 @@ services:
     env_file: .env
     ports:
       - 443:443/tcp
+    restart: always
