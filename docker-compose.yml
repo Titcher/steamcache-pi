@@ -19,6 +19,7 @@ services:
     image: lancachenet/generic-middle:latest
     depends_on:
       - ubuntu-nginx
+      - monolith
     entrypoint: sh -c exit
   generic-patched:
     build:
@@ -34,8 +35,6 @@ services:
   monolith:
     build:
       context: https://github.com/lancachenet/monolithic.git
-    depends_on: 
-      - generic
     image: lancachenet/monolithic:latest
     env_file: .env
     ports:
@@ -64,3 +63,4 @@ services:
     ports:
       - 443:443/tcp
     restart: always
+
